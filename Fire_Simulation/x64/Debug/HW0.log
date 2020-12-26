@@ -1,0 +1,2 @@
+﻿  Source.cpp
+LINK : fatal error LNK1104: 無法開啟檔案 'glew32.lib'
