@@ -23,7 +23,7 @@ using namespace glm;
 /// <summary>
 /// Class Particle system hasn't created yet
 /// </summary>
-const int MaxParticles = 10000;
+const int MaxParticles = 50000;
 Particle ParticlesContainer[MaxParticles];
 int LastUsedParticle = 0;
 float InitLife = 3.0f;
@@ -47,4 +47,9 @@ int FindUnusedParticle() {
 
 void SortParticles() {
 	std::sort(&ParticlesContainer[0], &ParticlesContainer[MaxParticles]);
+}
+
+float getLength(vec3 l)
+{
+	return sqrt(l.x * l.x + l.y * l.y + l.z * l.z);
 }

@@ -14,6 +14,7 @@ public:
 	float size, angle, weight;
 	float life;				// Remaining life of the particle. if <0 : dead and unused.
 	float cameradistance;	// *Squared* distance to the camera. if dead : -1.0f
+	int target;
 
 	bool operator<(const Particle& that) const {
 		// Sort in reverse order : far particles drawn first.
