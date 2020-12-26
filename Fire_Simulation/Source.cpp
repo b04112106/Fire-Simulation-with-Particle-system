@@ -134,18 +134,20 @@ int main() {
             ParticlesContainer[particleIndex].pos = glm::vec3(cos(randT * PI / 180.0), sin(randT * PI / 180.0)/4,  - 20.0f);
 
             float spread = 1.5f;
-            glm::vec3 maindir = glm::vec3(0.0f, 3.0f, 0.0f);
+            glm::vec3 maindir;
+            if(i % 3 == 0)maindir = glm::vec3(rand() % 3 - 1 , 1.0f, 0.0f);
+            else maindir = glm::vec3(0.0f, 1.0f, 0.0f);
             // Very bad way to generate a random direction; 
             // See for instance http://stackoverflow.com/questions/5408276/python-uniform-spherical-distribution instead,
             // combined with some user-controlled parameters (main direction, spread, etc)
             glm::vec3 randomDir = glm::vec3(
                 (rand() % 2000 - 1000.0f) / 500.0f,
                 (rand() % 2000 - 1000.0f) / 1000.0f,
-                (rand() % 2000 - 1000.0f) / 1000.0f
+                (rand() % 2000 - 1000.0f) / 500.0f
             );
+            
 
-            ParticlesContainer[particleIndex].speed = (maindir + randomDir * spread);
-
+            ParticlesContainer[particleIndex].speed = (maindir + randomDir);
 
             // Very bad way to generate a random color
             ParticlesContainer[particleIndex].color = Colour(255,191,0,255);
@@ -172,12 +174,15 @@ int main() {
                     //p.speed += glm::vec3(0.0f, -9.81f, 0.0f) * (float)delta * 0.5f;
                     p.pos += p.speed * (float)delta;
                     //std::cout << p.speed.x <<" "<<p.speed.y<<" "<<p.speed.z << std::endl;
-                    float l = p.speed.length();
-                    p.speed += (vec3(-p.pos.x, 10 - p.pos.y, 0)) * (float)delta;;
-                    float ll = p.speed.length();
+                    
+                    float l = sqrt(p.speed.x* p.speed.x + p.speed.y*p.speed.y+ p.speed.z* p.speed.z);
+                    p.speed += (vec3(-p.pos.x * 0.5f, 10 - p.pos.y, 0)) * (float)delta;
+                    float ll = sqrt(p.speed.x * p.speed.x + p.speed.y * p.speed.y + p.speed.z * p.speed.z);
+                    
                     p.speed.x *= (l / ll);
                     p.speed.y *= (l / ll);
                     p.speed.z *= (l / ll);
+                    
                     p.cameradistance = glm::length2(p.pos - CameraPosition);
                     //ParticlesContainer[i].pos += glm::vec3(0.0f,10.0f, 0.0f) * (float)delta;
 

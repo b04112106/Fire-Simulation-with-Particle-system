@@ -1,9 +1,7 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(491,5): warning MSB8028: 中繼目錄 (Debug\) 包含從其他專案 (HW0.vcxproj) 共用的檔案。這可能導致錯誤的清除和重建行為。
   Source.cpp
-C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(164,32): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(166,53): warning C4244: '=': 將 'float' 轉換為 'unsigned char'，由於類型不同，可能導致資料遺失
-C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(168,81): warning C4244: '=': 將 'float' 轉換為 'unsigned char'，由於類型不同，可能導致資料遺失
-C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(169,100): warning C4244: '*=': 將 'float' 轉換為 'unsigned char'，由於類型不同，可能導致資料遺失
-C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(175,29): warning C4244: '正在初始化': 將 'glm::vec<3,float,glm::packed_highp>::length_type' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(177,30): warning C4244: '正在初始化': 將 'glm::vec<3,float,glm::packed_highp>::length_type' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(166,32): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(168,53): warning C4244: '=': 將 'float' 轉換為 'unsigned char'，由於類型不同，可能導致資料遺失
+C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(170,81): warning C4244: '=': 將 'float' 轉換為 'unsigned char'，由於類型不同，可能導致資料遺失
+C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(171,100): warning C4244: '*=': 將 'float' 轉換為 'unsigned char'，由於類型不同，可能導致資料遺失
   Fire_Simulation.vcxproj -> C:\Users\CGGM\source\repos\Fire_Simulation\Debug\Fire_Simulation.exe
