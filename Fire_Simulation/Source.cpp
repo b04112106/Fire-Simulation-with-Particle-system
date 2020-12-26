@@ -64,11 +64,17 @@ int main() {
 
     // The VBO containing the 4 vertices of the particles.
     // Thanks to instancing, they will be shared by all particles.
-    static const GLfloat g_vertex_buffer_data[] = {
-         -0.5f, -0.5f, 0.0f,
-          0.5f, -0.5f, 0.0f,
-         -0.5f,  0.5f, 0.0f,
-          0.5f,  0.5f, 0.0f,
+    static GLfloat g_vertex_buffer_data[] = {
+        0.0f,0.0f,0.0f,
+        0.3535f,-0.3535f,0.0f,
+        0.0f,-0.5f,0.0f,
+        -0.3535f,-0.3535f,0.0f,
+        -0.5f,0.0f,0.0f,
+        -0.3535f,0.3535f,0.0f,
+        0.0f,0.5f,0.0f,
+        0.3535f,0.3535f,0.0f,
+        0.5f,0.0f,0.0f,
+        0.3535f,-0.3535f,0.0f,
     };
 
     GLuint billboard_vertex_buffer;
@@ -101,7 +107,7 @@ int main() {
         double currentTime = glfwGetTime();
         double delta = currentTime - lastTime;
         lastTime = currentTime;
-        
+
         computeMatricesFromInputs(window);
         glm::mat4 ProjectionMatrix = getProjectionMatrix();
         glm::mat4 ViewMatrix = getViewMatrix();
@@ -128,12 +134,12 @@ int main() {
             ParticlesContainer[particleIndex].pos = glm::vec3(cos(randT * PI / 180.0), sin(randT * PI / 180.0)/4,  - 20.0f);
 
             float spread = 1.5f;
-            glm::vec3 maindir = glm::vec3(0.0f, 10.0f, 0.0f);
+            glm::vec3 maindir = glm::vec3(0.0f, 3.0f, 0.0f);
             // Very bad way to generate a random direction; 
             // See for instance http://stackoverflow.com/questions/5408276/python-uniform-spherical-distribution instead,
             // combined with some user-controlled parameters (main direction, spread, etc)
             glm::vec3 randomDir = glm::vec3(
-                (rand() % 2000 - 1000.0f) / 1000.0f,
+                (rand() % 2000 - 1000.0f) / 500.0f,
                 (rand() % 2000 - 1000.0f) / 1000.0f,
                 (rand() % 2000 - 1000.0f) / 1000.0f
             );
@@ -143,7 +149,7 @@ int main() {
 
             // Very bad way to generate a random color
             ParticlesContainer[particleIndex].color = Colour(255,191,0,255);
-            ParticlesContainer[particleIndex].size = 0.4f;
+            ParticlesContainer[particleIndex].size = 0.5f;
         }
 
         // Simulate all particles
@@ -165,6 +171,13 @@ int main() {
                     // Simulate simple physics : gravity only, no collisions
                     //p.speed += glm::vec3(0.0f, -9.81f, 0.0f) * (float)delta * 0.5f;
                     p.pos += p.speed * (float)delta;
+                    //std::cout << p.speed.x <<" "<<p.speed.y<<" "<<p.speed.z << std::endl;
+                    float l = p.speed.length();
+                    p.speed += (vec3(-p.pos.x, 10 - p.pos.y, 0)) * (float)delta;;
+                    float ll = p.speed.length();
+                    p.speed.x *= (l / ll);
+                    p.speed.y *= (l / ll);
+                    p.speed.z *= (l / ll);
                     p.cameradistance = glm::length2(p.pos - CameraPosition);
                     //ParticlesContainer[i].pos += glm::vec3(0.0f,10.0f, 0.0f) * (float)delta;
 
@@ -212,6 +225,10 @@ int main() {
         glUniform1i(TextureID, 0);
 
         // Same as the billboards tutorial
+        /*std::cout << "ViewMatrix[*][0]: " << ViewMatrix[0][0] << " " << ViewMatrix[1][0] << " " << ViewMatrix[2][0] << " " << ViewMatrix[3][0] << std::endl;
+        std::cout << "ViewMatrix[*][1]: " << ViewMatrix[0][1] << " " << ViewMatrix[1][1] << " " << ViewMatrix[2][1] << " " << ViewMatrix[3][1] << std::endl;
+        std::cout << "ViewMatrix[*][2]: " << ViewMatrix[0][2] << " " << ViewMatrix[1][2] << " " << ViewMatrix[2][2] << " " << ViewMatrix[3][2] << std::endl;
+        std::cout << "ViewMatrix[*][3]: " << ViewMatrix[0][3] << " " << ViewMatrix[1][3] << " " << ViewMatrix[2][3] << " " << ViewMatrix[3][3] << std::endl;*/
         glUniform3f(CameraRight_worldspace_ID, ViewMatrix[0][0], ViewMatrix[1][0], ViewMatrix[2][0]);
         glUniform3f(CameraUp_worldspace_ID, ViewMatrix[0][1], ViewMatrix[1][1], ViewMatrix[2][1]);
 
@@ -265,9 +282,7 @@ int main() {
         // This is equivalent to :
         // for(i in ParticlesCount) : glDrawArrays(GL_TRIANGLE_STRIP, 0, 4), 
         // but faster.
-        glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, ParticlesCount);
-        /*for (int i = 0; i < ParticlesCount; ++i)
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);*/
+        glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 10, ParticlesCount);
 
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);

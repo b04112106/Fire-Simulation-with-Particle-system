@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include<iostream>
 #include <vector>
 #include <algorithm>
 #include <GL/glew.h>
@@ -22,7 +23,7 @@ using namespace glm;
 /// <summary>
 /// Class Particle system hasn't created yet
 /// </summary>
-const int MaxParticles = 30000;
+const int MaxParticles = 10000;
 Particle ParticlesContainer[MaxParticles];
 int LastUsedParticle = 0;
 float InitLife = 3.0f;
