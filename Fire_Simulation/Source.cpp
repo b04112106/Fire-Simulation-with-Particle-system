@@ -1,5 +1,31 @@
 #include "Particle_System.h"
 int main() {
+	///////////////Control Variables/////////////////
+	bool ManuallyAdjustLowPressPoint = true;
+	vec3 LowPress[3][3] = {
+		vec3(0.5f, 3, -20.0f),vec3(0, 3, -20.0f),vec3(-0.5f, 3, -20.0f),
+		vec3(0.25f, 6, -20.0f), vec3(0, 6, -20.0f), vec3(-0.25f, 6, -20.0f),
+		vec3(0, 8, -20.0f),vec3(0, 8, -20.0f),vec3(0, 8, -20.0f)
+	};
+	float heightOfLowPress[3] = {3,6,8};
+	float ParticlesPerSecond = 1000;
+	float InitialPositionRadius = 1.0f;
+	vec3 PoolOfInitialVelocity[] = {
+		vec3(1,3,0),
+		vec3(-1,3,0),
+		vec3(0,3,0)
+	};
+	int lengthOfPool = sizeof(PoolOfInitialVelocity);
+	float randV_Xmax = 1.0,randV_Xmin = -1.0;
+	float randV_Ymax = 1.0,randV_Ymin = -1.0;
+	float randV_Zmax = 1.0,randV_Zmin = -1.0;
+	Colour InitialColor(255,191,0,255);
+	float InitialSize = 0.075f;
+	float InitLife = 3.0f;
+	const int MaxParticles = 50000;
+	Particle ParticlesContainer[MaxParticles];
+	float forceOfPress = 2.0f;
+	/////////////////////////////////////////////////
     // Initialise GLFW
     if (!glfwInit())
     {
@@ -64,7 +90,7 @@ int main() {
 
     // The VBO containing the 4 vertices of the particles.
     // Thanks to instancing, they will be shared by all particles.
-    static GLfloat g_vertex_buffer_data[] = {
+    static const GLfloat g_vertex_buffer_data[] = {
         0.0f,0.0f,0.0f,
         0.3535f,-0.3535f,0.0f,
         0.0f,-0.5f,0.0f,
@@ -102,10 +128,16 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     // Accept fragment if it closer to the camera than the former one
     glDepthFunc(GL_LESS);
-
-    vec3 LowPress10(0.5f, 3, -20.0f), LowPress11(0, 3, -20.0f), LowPress12(-0.5f, 3, -20.0f);
-    vec3 LowPress20(0.25f, 6, -20.0f), LowPress21(0, 6, -20.0f), LowPress22(-0.25f, 6, -20.0f);
-    vec3 LowPress3(0, 8, -20.0f);
+	
+	if(!ManuallyAdjustLowPressPoint){
+		LowPress[0][0].y = heightOfLowPress[0];
+		LowPress[0][1].y = heightOfLowPress[0];
+		LowPress[0][2].y = heightOfLowPress[0];
+		LowPress[1][0].y = heightOfLowPress[1];
+		LowPress[1][1].y = heightOfLowPress[1];
+		LowPress[1][2].y = heightOfLowPress[1];
+		LowPress[2][0].y = heightOfLowPress[2];
+	}
     do {
         // Clear the screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -127,43 +159,33 @@ int main() {
         glm::mat4 ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
 
         // Numbers of newparitcles in each frame, limited by 16 particles each frame
-        int newparticles = (int)(delta * 50000.0);
-        if (newparticles > (int)(0.050f * 5000.0))
-            newparticles = (int)(0.050f * 5000.0);
+        int newparticles = (int)(delta * ParticlesPerSecond);
+        if (newparticles > (int)(0.050f * ParticlesPerSecond))
+            newparticles = (int)(0.050f * ParticlesPerSecond);
         
         // Add new particles and initialize
         for (int i = 0; i < newparticles; i++) {
-            /*if( i == 0 )
-                std::cout << "newparticles is " << newparticles << std::endl;*/
             int particleIndex = FindUnusedParticle();
-            // if (i == 0)
-            //std::cout << "particleIndex is " << particleIndex << std::endl;
             ParticlesContainer[particleIndex].life = InitLife - (float)((rand() % 100) / 300.0);
 
             float randT = (float)(rand() % 360);
-            float r = (float)(rand() % 100 / 100.0);
-            if (r < 0.25f)ParticlesContainer[particleIndex].life = InitLife;
+            float r = (float)(rand() % 100 / 100.0) * InitialPositionRadius;
             ParticlesContainer[particleIndex].pos = glm::vec3(r * cos(randT * PI / 180.0), r * sin(randT * PI / 180.0) / 1.2f, -20.0f);
 
             glm::vec3 maindir;
-            if(i % 3 == 0)
-                maindir = glm::vec3(rand() % 3 - 1 , 2.0f, 0.0f);
-            else
-                maindir = glm::vec3(0.0f, 1.0f, 0.0f);
+            maindir = PoolOfInitialVelocity[rand() % lengthOfPool];
             glm::vec3 randomDir = glm::vec3(
-                (rand() % 2000 - 1000.0f) / 1000.0f,
-                (rand() % 2000 - 1000.0f) / 1000.0f,
-                (rand() % 2000 - 1000.0f) / 1000.0f
+                (rand() % ((randV_Xmax - randV_Xmin) * 2000.0f) + 1000.0f * randV_Xmin) / 1000.0f,
+                (rand() % ((randV_Ymax - randV_Ymin) * 2000.0f) + 1000.0f * randV_Ymin) / 1000.0f,
+                (rand() % ((randV_Zmax - randV_Zmin) * 2000.0f) + 1000.0f * randV_Zmin) / 1000.0f
             );
             ParticlesContainer[particleIndex].target = rand() % 3;
 
             ParticlesContainer[particleIndex].speed = (maindir + randomDir);
 
-            // Very bad way to generate a random color
-            ParticlesContainer[particleIndex].color = Colour(255,191,0,255);
-            ParticlesContainer[particleIndex].size = 0.075f;
+            ParticlesContainer[particleIndex].color = InitialColor;
+            ParticlesContainer[particleIndex].size = InitialSize;
         }
-        //LowPress1 = vec3(sin(currentTime * 5.0f)*5.0f, 1, 0);
         // Simulate all particles
         int ParticlesCount = 0;
         for (int i = 0; i < MaxParticles; i++) {
@@ -171,100 +193,38 @@ int main() {
             Particle& p = ParticlesContainer[i]; // shortcut
 
             if (p.life > 0.0f) {
-
                 // Decrease life
                 p.life -= delta;
                 if (p.life > 0.0f) {
                     // Update Colour
-                    //p.color.a = rand() % 10 / 10.0 * 255; // 
                     p.color.a = (p.life) / InitLife * 255;
-                    p.size = (p.life) / InitLife * 0.075f;
-                    p.color.g = 191 * (p.life) / InitLife;// +100 * (1 - (p.life) * (p.life) / InitLife / InitLife);
+                    p.size = (p.life) / InitLife * InitialSize;
+                    p.color.g = 191 * (p.life) / InitLife;
                     p.color.g *= ((256 - pow(2,8*(1 - (p.life) / InitLife)))/256.0);
 
-                    // Update Velocity
-                    // Simulate simple physics : gravity only, no collisions
-                    //p.speed += glm::vec3(0.0f, -9.81f, 0.0f) * (float)delta * 0.5f;
+                    // Update Position
                     float last_y = p.pos.y;
-                    p.pos += p.speed * (float)delta;
-                    //std::cout << p.speed.x <<" "<<p.speed.y<<" "<<p.speed.z << std::endl;
+                    p.pos += p.speed * (float)delta; 
+
+					// Update Velocity					
                     float l = getLength(p.speed);
                     float temp = p.speed.y;
-                    if (p.pos.y < LowPress10.y) {
-                        switch (p.target)
-                        {
-                        case 0:
-                            p.speed += (LowPress10 - p.pos) * (float)delta * 2.0f;// *(float)sin(rand() % 360 * currentTime);
-                            break;
-                        case 1:
-                            p.speed += (LowPress11 - p.pos) * (float)delta * 2.0f;// *(float)sin(rand() % 360 * currentTime);
-                            break;
-                        case 2:
-                            p.speed += (LowPress12 - p.pos) * (float)delta * 2.0f;// *(float)sin(rand() % 360 * currentTime);
-                            break;
-                        }
-                        //float d0 = getLength(LowPress10 - p.pos);
-                        //float d1 = getLength(LowPress11 - p.pos);
-                        //float d2 = getLength(LowPress12 - p.pos);
-                        //if (d0 >= d1 && d0 >= d2)
-                        //{
-                        //    p.speed += (LowPress10 - p.pos) * (float)delta * 8.0f;// *(float)sin(rand() % 360 * currentTime);
-                        //}
-                        //if (d1 >= d0 && d1 >= d2)
-                        //{
-                        //    p.speed += (LowPress11 - p.pos) * (float)delta * 8.0f;// *(float)sin(rand() % 360 * currentTime);
-                        //}
-                        //if (d2 >= d1 && d2 >= d0)
-                        //{
-                        //    p.speed += (LowPress12 - p.pos) * (float)delta * 8.0f;// *(float)sin(rand() % 360 * currentTime);
-                        //}
-                        ////p.speed += (LowPress1 - p.pos) * (float)delta * 8.0f * (float)sin(rand() % 360 * currentTime);
+                    if (p.pos.y < LowPress[0][0].y) {
+                        p.speed += getDirection(LowPress[0][target] - p.pos) * (float)delta * forceOfPress;
                     }
-                    else if (p.pos.y < LowPress20.y) {
-                        if (last_y < LowPress10.y)
+                    else if (p.pos.y < LowPress[1][0].y) {
+                        if (last_y < LowPress[0][0].y)
                         {
                             p.target = rand() % 3;
                         }
-                        switch (rand() % 3)
-                        {
-                        case 0:
-                            p.speed += (LowPress10 - p.pos) * (float)delta * 2.0f;// *(float)sin(rand() % 360 * currentTime);
-                            break;
-                        case 1:
-                            p.speed += (LowPress11 - p.pos) * (float)delta * 2.0f;// *(float)sin(rand() % 360 * currentTime);
-                            break;
-                        case 2:
-                            p.speed += (LowPress12 - p.pos) * (float)delta * 2.0f;// *(float)sin(rand() % 360 * currentTime);
-                            break;
-                        }
-                        //}
-                        //float d0 = getLength(LowPress20 - p.pos);
-                        //float d1 = getLength(LowPress21 - p.pos);
-                        //float d2 = getLength(LowPress22 - p.pos);
-                        //if (d0 >= d1 && d0 >= d2)
-                        //{
-                        //    p.speed += (LowPress20 - p.pos) * (float)delta * 8.0f;// *(float)sin(rand() % 360 * currentTime);
-                        //}
-                        //if (d1 >= d0 && d1 >= d2)
-                        //{
-                        //    p.speed += (LowPress21 - p.pos) * (float)delta * 8.0f;// *(float)sin(rand() % 360 * currentTime);
-                        //}
-                        //if (d2 >= d1 && d2 >= d0)
-                        //{
-                        //    p.speed += (LowPress22 - p.pos) * (float)delta * 8.0f;// *(float)sin(rand() % 360 * currentTime);
-                        //}
+                        p.speed += getDirection(LowPress[1][target] - p.pos) * (float)delta * forceOfPress;
                     }
                     else
-                        p.speed += (LowPress3 - p.pos) * (float)delta * 5.0f;
+                        p.speed += getDirection(LowPress[2][0] - p.pos) * (float)delta * forceOfPress;
 
-                    
-                    // vec3(0,10,0) - pos
-                    //p.speed += (vec3(-p.pos.x * 0.5f, 10 - p.pos.y, 0)) * (float)delta * 2.0f;
-                    p.speed.y = temp; 
-                    float ll = getLength(p.speed);
-                    
+                    p.speed.y = temp;  // y velocity remains the same
+                    float ll = getLength(p.speed);                    
                     p.speed.x *= (l / ll);
-                    // *= (l / ll);
                     p.speed.z *= (l / ll);
                     
                     p.cameradistance = glm::length2(p.pos - CameraPosition);
