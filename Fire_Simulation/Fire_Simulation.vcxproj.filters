@@ -27,6 +27,15 @@
     <ClCompile Include="include\common\texture.cpp">
       <Filter>標頭檔</Filter>
     </ClCompile>
+    <ClCompile Include="Particle.cpp">
+      <Filter>標頭檔</Filter>
+    </ClCompile>
+    <ClCompile Include="Particle_System.cpp">
+      <Filter>標頭檔</Filter>
+    </ClCompile>
+    <ClCompile Include="Colour.cpp">
+      <Filter>標頭檔</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Particle.h">
@@ -42,6 +51,9 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="include\common\texture.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Colour.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>

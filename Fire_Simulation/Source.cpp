@@ -76,18 +76,14 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, billboard_vertex_buffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
-    // The VBO containing the positions and sizes of the particles
     GLuint particles_position_buffer;
     glGenBuffers(1, &particles_position_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
-    // Initialize with empty (NULL) buffer : it will be updated later, each frame.
     glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
 
-    // The VBO containing the colors of the particles
     GLuint particles_color_buffer;
     glGenBuffers(1, &particles_color_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
-    // Initialize with empty (NULL) buffer : it will be updated later, each frame.
     glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW);
 
     double lastTime = glfwGetTime();
@@ -99,7 +95,6 @@ int main() {
 
     
     do {
-        glUseProgram(programID);
         // Clear the screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -119,13 +114,12 @@ int main() {
 
         glm::mat4 ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
 
-        // Generate 10 new particule each millisecond,
-        // but limit this to 16 ms (60 fps), or if you have 1 long frame (1sec),
-        // newparticles will be huge and the next frame even longer.
+        // Numbers of newparitcles in each frame, limited by 16 particles each frame
         int newparticles = (int)(delta * 1000.0);
         if (newparticles > (int)(0.016f * 1000.0))
             newparticles = (int)(0.016f * 1000.0);
         
+        // Add new particles and initialize
         for (int i = 0; i < newparticles; i++) {
             int particleIndex = FindUnusedParticle();
             ParticlesContainer[particleIndex].life = InitLife - (float)((rand() % 500 )/ 100);
@@ -148,12 +142,8 @@ int main() {
 
 
             // Very bad way to generate a random color
-            ParticlesContainer[particleIndex].r = 255;
-            ParticlesContainer[particleIndex].g = 191;
-            ParticlesContainer[particleIndex].b = 0;
-            ParticlesContainer[particleIndex].a = 255;
-
-            ParticlesContainer[particleIndex].size = 0.5f;
+            ParticlesContainer[particleIndex].color = Colour(255,191,0,255);
+            ParticlesContainer[particleIndex].size = 1.0f;
         }
 
         // Simulate all particles
@@ -167,8 +157,11 @@ int main() {
                 // Decrease life
                 p.life -= delta;
                 if (p.life > 0.0f) {
-                    p.a = (p.life) / 5 * 255;
-                    p.g = 191 * (p.life) * (p.life) / InitLife / InitLife + 100 * (1-(p.life) * (p.life) / InitLife / InitLife);
+                    p.color.a = (p.life) / InitLife * 255;
+                    p.size = (p.life) / InitLife;
+                    p.color.g = 191 * (p.life) * (p.life) / InitLife / InitLife + 100 * (1-(p.life) * (p.life) / InitLife / InitLife);
+                    p.color.g *= (1-(p.life)* (p.life) * (p.life) / InitLife / InitLife / InitLife);
+                    //p.color.r = 255 * (p.life) * (p.life) / InitLife / InitLife;
                     // Simulate simple physics : gravity only, no collisions
                     //p.speed += glm::vec3(0.0f, -9.81f, 0.0f) * (float)delta * 0.5f;
                     p.pos += p.speed * (float)delta;
@@ -182,32 +175,28 @@ int main() {
 
                     g_particule_position_size_data[4 * ParticlesCount + 3] = p.size;
 
-                    g_particule_color_data[4 * ParticlesCount + 0] = p.r;
-                    g_particule_color_data[4 * ParticlesCount + 1] = p.g;
-                    g_particule_color_data[4 * ParticlesCount + 2] = p.b;
-                    g_particule_color_data[4 * ParticlesCount + 3] = p.a;
-
+                    g_particule_color_data[4 * ParticlesCount + 0] = p.color.r;
+                    g_particule_color_data[4 * ParticlesCount + 1] = p.color.g;
+                    g_particule_color_data[4 * ParticlesCount + 2] = p.color.b;
+                    g_particule_color_data[4 * ParticlesCount + 3] = p.color.a;
                 }
                 else {
                     // Particles that just died will be put at the end of the buffer in SortParticles();
                     p.cameradistance = -1.0f;
                 }
-
                 ParticlesCount++;
-
             }
         }
 
         SortParticles();
 
         glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
-        glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
+        glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // Buffer orphaning
         glBufferSubData(GL_ARRAY_BUFFER, 0, ParticlesCount * sizeof(GLfloat) * 4, g_particule_position_size_data);
 
         glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
-        glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
+        glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW); // Buffer orphaning
         glBufferSubData(GL_ARRAY_BUFFER, 0, ParticlesCount * sizeof(GLubyte) * 4, g_particule_color_data);
-
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -227,7 +216,7 @@ int main() {
 
         glUniformMatrix4fv(ViewProjMatrixID, 1, GL_FALSE, &ViewProjectionMatrix[0][0]);
 
-        // 1rst attribute buffer : vertices
+        // 1st attribute buffer : vertices
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, billboard_vertex_buffer);
         glVertexAttribPointer(
@@ -266,7 +255,6 @@ int main() {
         // These functions are specific to glDrawArrays*Instanced*.
         // The first parameter is the attribute buffer we're talking about.
         // The second parameter is the "rate at which generic vertex attributes advance when rendering multiple instances"
-        // http://www.opengl.org/sdk/docs/man/xhtml/glVertexAttribDivisor.xml
         glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
         glVertexAttribDivisor(1, 1); // positions : one per quad (its center)                 -> 1
         glVertexAttribDivisor(2, 1); // color : one per quad                                  -> 1
@@ -277,6 +265,8 @@ int main() {
         // for(i in ParticlesCount) : glDrawArrays(GL_TRIANGLE_STRIP, 0, 4), 
         // but faster.
         glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, ParticlesCount);
+        /*for (int i = 0; i < ParticlesCount; ++i)
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);*/
 
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);

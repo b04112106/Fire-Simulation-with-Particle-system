@@ -148,12 +148,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Colour.cpp" />
     <ClCompile Include="include\common\controls.cpp" />
     <ClCompile Include="include\common\shader.cpp" />
     <ClCompile Include="include\common\texture.cpp" />
+    <ClCompile Include="Particle.cpp" />
+    <ClCompile Include="Particle_System.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Colour.h" />
     <ClInclude Include="include\common\controls.hpp" />
     <ClInclude Include="include\common\shader.hpp" />
     <ClInclude Include="include\common\texture.hpp" />
