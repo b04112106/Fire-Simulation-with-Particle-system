@@ -125,7 +125,7 @@ int main() {
             ParticlesContainer[particleIndex].life = InitLife - (float)((rand() % 500 )/ 100);
 
             float randT = (float)(rand() % 360);
-            ParticlesContainer[particleIndex].pos = glm::vec3(cos(randT * PI / 180.0), sin(randT * PI / 180.0),  - 20.0f);
+            ParticlesContainer[particleIndex].pos = glm::vec3(cos(randT * PI / 180.0), sin(randT * PI / 180.0)/4,  - 20.0f);
 
             float spread = 1.5f;
             glm::vec3 maindir = glm::vec3(0.0f, 10.0f, 0.0f);
@@ -143,7 +143,7 @@ int main() {
 
             // Very bad way to generate a random color
             ParticlesContainer[particleIndex].color = Colour(255,191,0,255);
-            ParticlesContainer[particleIndex].size = 1.0f;
+            ParticlesContainer[particleIndex].size = 0.4f;
         }
 
         // Simulate all particles
@@ -158,7 +158,7 @@ int main() {
                 p.life -= delta;
                 if (p.life > 0.0f) {
                     p.color.a = (p.life) / InitLife * 255;
-                    p.size = (p.life) / InitLife;
+                    p.size = (p.life) / InitLife * 0.4f;
                     p.color.g = 191 * (p.life) * (p.life) / InitLife / InitLife + 100 * (1-(p.life) * (p.life) / InitLife / InitLife);
                     p.color.g *= (1-(p.life)* (p.life) * (p.life) / InitLife / InitLife / InitLife);
                     //p.color.r = 255 * (p.life) * (p.life) / InitLife / InitLife;
@@ -183,6 +183,7 @@ int main() {
                 else {
                     // Particles that just died will be put at the end of the buffer in SortParticles();
                     p.cameradistance = -1.0f;
+                    p.color.a = 0;
                 }
                 ParticlesCount++;
             }

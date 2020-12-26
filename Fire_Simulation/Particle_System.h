@@ -22,7 +22,7 @@ using namespace glm;
 /// <summary>
 /// Class Particle system hasn't created yet
 /// </summary>
-const int MaxParticles = 10000;
+const int MaxParticles = 30000;
 Particle ParticlesContainer[MaxParticles];
 int LastUsedParticle = 0;
 float InitLife = 3.0f;
