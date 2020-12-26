@@ -168,7 +168,7 @@ int main() {
                     p.color.a = (p.life) / InitLife * 255;
                     p.size = (p.life) / InitLife * 0.4f;
                     p.color.g = 191 * (p.life) * (p.life) / InitLife / InitLife + 100 * (1-(p.life) * (p.life) / InitLife / InitLife);
-                    p.color.g *= (1-(p.life)* (p.life) * (p.life) / InitLife / InitLife / InitLife);
+                    p.color.g *= ((p.life) / InitLife) * ((p.life) / InitLife) * ((p.life) / InitLife);
                     //p.color.r = 255 * (p.life) * (p.life) / InitLife / InitLife;
                     // Simulate simple physics : gravity only, no collisions
                     //p.speed += glm::vec3(0.0f, -9.81f, 0.0f) * (float)delta * 0.5f;
