@@ -23,8 +23,10 @@ using namespace glm;
 /// <summary>
 /// Class Particle system hasn't created yet
 /// </summary>
+/// 
+const int MaxParticles = 100000;
+Particle ParticlesContainer[MaxParticles];
 int LastUsedParticle = 0;
-
 int FindUnusedParticle() {
 
 	for (int i = LastUsedParticle; i < MaxParticles; i++) {

@@ -1,30 +1,38 @@
 #include "Particle_System.h"
 int main() {
 	///////////////Control Variables/////////////////
-	bool ManuallyAdjustLowPressPoint = true;
-	vec3 LowPress[3][3] = {
-		vec3(0.5f, 3, -20.0f),vec3(0, 3, -20.0f),vec3(-0.5f, 3, -20.0f),
-		vec3(0.25f, 6, -20.0f), vec3(0, 6, -20.0f), vec3(-0.25f, 6, -20.0f),
-		vec3(0, 8, -20.0f),vec3(0, 8, -20.0f),vec3(0, 8, -20.0f)
-	};
-	float heightOfLowPress[3] = {3,6,8};
-	float ParticlesPerSecond = 1000;
-	float InitialPositionRadius = 1.0f;
-	vec3 PoolOfInitialVelocity[] = {
-		vec3(1,3,0),
-		vec3(-1,3,0),
-		vec3(0,3,0)
-	};
-	int lengthOfPool = sizeof(PoolOfInitialVelocity);
-	float randV_Xmax = 1.0,randV_Xmin = -1.0;
-	float randV_Ymax = 1.0,randV_Ymin = -1.0;
-	float randV_Zmax = 1.0,randV_Zmin = -1.0;
-	Colour InitialColor(255,191,0,255);
-	float InitialSize = 0.075f;
-	float InitLife = 3.0f;
-	const int MaxParticles = 50000;
-	Particle ParticlesContainer[MaxParticles];
-	float forceOfPress = 2.0f;
+    bool ManuallyAdjustLowPressPoint = false;
+    bool UseLowPress = true;
+    bool EnableWindEffect = true;
+    vec3 OriLowPress[3][3] = {
+        {vec3(0.5f, 3, -20.0f),vec3(0, 3, -20.0f),vec3(-0.5f, 3, -20.0f)},
+        {vec3(0.25f, 6, -20.0f), vec3(0, 6, -20.0f), vec3(-0.25f, 6, -20.0f)},
+        {vec3(0, 8, -20.0f),vec3(0, 8, -20.0f),vec3(0, 8, -20.0f)}
+    };
+    vec3 LowPress[3][3] = {
+        {vec3(0.5f, 3, -20.0f),vec3(0, 3, -20.0f),vec3(-0.5f, 3, -20.0f)},
+        {vec3(0.25f, 6, -20.0f), vec3(0, 6, -20.0f), vec3(-0.25f, 6, -20.0f)},
+        {vec3(0, 8, -20.0f),vec3(0, 8, -20.0f),vec3(0, 8, -20.0f)}
+    };
+    float heightOfLowPress[3] = { 2,4,8 };
+
+    float ParticlesPerSecond = 4500;
+    float InitialPositionRadius = 1.0f;
+    vec3 PoolOfInitialVelocity[] = {
+        vec3(-1,5,0),
+        vec3(1,5,0),
+        vec3(0,5,0)
+    };
+    int lengthOfPool = sizeof(PoolOfInitialVelocity) / 12;
+    float randV_Xmax = 2.0, randV_Xmin = -2.0;
+    float randV_Ymax = 1.0, randV_Ymin = -1.0;
+    float randV_Zmax = 2.0, randV_Zmin = -2.0;
+    unsigned int InitialAlpha = 64;
+    Colour InitialColor(255, 191, 0, InitialAlpha);
+    float InitialSize = 0.5f;
+    float InitLife = 3.0f;
+    float forceOfPress = 20.0f;
+    float BurstRate = 1.0f;
 	/////////////////////////////////////////////////
     // Initialise GLFW
     if (!glfwInit())
@@ -130,13 +138,13 @@ int main() {
     glDepthFunc(GL_LESS);
 	
 	if(!ManuallyAdjustLowPressPoint){
-		LowPress[0][0].y = heightOfLowPress[0];
-		LowPress[0][1].y = heightOfLowPress[0];
-		LowPress[0][2].y = heightOfLowPress[0];
-		LowPress[1][0].y = heightOfLowPress[1];
-		LowPress[1][1].y = heightOfLowPress[1];
-		LowPress[1][2].y = heightOfLowPress[1];
-		LowPress[2][0].y = heightOfLowPress[2];
+		LowPress[0][0].y = heightOfLowPress[0] * BurstRate;
+		LowPress[0][1].y = heightOfLowPress[0] * BurstRate;
+		LowPress[0][2].y = heightOfLowPress[0] * BurstRate;
+		LowPress[1][0].y = heightOfLowPress[1] * BurstRate;
+		LowPress[1][1].y = heightOfLowPress[1] * BurstRate;
+		LowPress[1][2].y = heightOfLowPress[1] * BurstRate;
+		LowPress[2][0].y = heightOfLowPress[2] * BurstRate;
 	}
     do {
         // Clear the screen
@@ -158,10 +166,20 @@ int main() {
 
         glm::mat4 ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
 
+        if (EnableWindEffect)
+        {
+            LowPress[0][0].x = OriLowPress[0][0].x + sin(currentTime * 2.0f) + 1;
+            LowPress[0][1].x = OriLowPress[0][1].x + sin(currentTime * 2.0f) + 1;
+            LowPress[0][2].x = OriLowPress[0][2].x + sin(currentTime * 2.0f) + 1;
+            LowPress[1][0].x = OriLowPress[1][0].x + sin(currentTime * 5.0f) + 1;
+            LowPress[1][1].x = OriLowPress[1][1].x + sin(currentTime * 5.0f) + 1;
+            LowPress[1][2].x = OriLowPress[1][2].x + sin(currentTime * 5.0f) + 1;
+            LowPress[2][0].x = OriLowPress[2][0].x + sin(currentTime) + 1;
+        }
         // Numbers of newparitcles in each frame, limited by 16 particles each frame
-        int newparticles = (int)(delta * ParticlesPerSecond);
-        if (newparticles > (int)(0.050f * ParticlesPerSecond))
-            newparticles = (int)(0.050f * ParticlesPerSecond);
+        int newparticles = (int)(delta * ParticlesPerSecond * BurstRate);
+        if (newparticles > (int)(0.050f * ParticlesPerSecond * BurstRate))
+            newparticles = (int)(0.050f * ParticlesPerSecond * BurstRate);
         
         // Add new particles and initialize
         for (int i = 0; i < newparticles; i++) {
@@ -172,16 +190,15 @@ int main() {
             float r = (float)(rand() % 100 / 100.0) * InitialPositionRadius;
             ParticlesContainer[particleIndex].pos = glm::vec3(r * cos(randT * PI / 180.0), r * sin(randT * PI / 180.0) / 1.2f, -20.0f);
 
-            glm::vec3 maindir;
-            maindir = PoolOfInitialVelocity[rand() % lengthOfPool];
+            glm::vec3 maindir = PoolOfInitialVelocity[rand() % lengthOfPool];
             glm::vec3 randomDir = glm::vec3(
-                (rand() % ((randV_Xmax - randV_Xmin) * 2000.0f) + 1000.0f * randV_Xmin) / 1000.0f,
-                (rand() % ((randV_Ymax - randV_Ymin) * 2000.0f) + 1000.0f * randV_Ymin) / 1000.0f,
-                (rand() % ((randV_Zmax - randV_Zmin) * 2000.0f) + 1000.0f * randV_Zmin) / 1000.0f
+                (rand() % (int)((randV_Xmax - randV_Xmin) * 1000.0f) + 1000.0f * randV_Xmin) / 1000.0f,
+                (rand() % (int)((randV_Ymax - randV_Ymin) * 1000.0f) + 1000.0f * randV_Ymin) / 1000.0f,
+                (rand() % (int)((randV_Zmax - randV_Zmin) * 1000.0f) + 1000.0f * randV_Zmin) / 1000.0f
             );
             ParticlesContainer[particleIndex].target = rand() % 3;
 
-            ParticlesContainer[particleIndex].speed = (maindir + randomDir);
+            ParticlesContainer[particleIndex].speed = (maindir + randomDir) * BurstRate;
 
             ParticlesContainer[particleIndex].color = InitialColor;
             ParticlesContainer[particleIndex].size = InitialSize;
@@ -197,10 +214,11 @@ int main() {
                 p.life -= delta;
                 if (p.life > 0.0f) {
                     // Update Colour
-                    p.color.a = (p.life) / InitLife * 255;
+                    p.color.a = (p.life) / InitLife * InitialAlpha;
                     p.size = (p.life) / InitLife * InitialSize;
                     p.color.g = 191 * (p.life) / InitLife;
                     p.color.g *= ((256 - pow(2,8*(1 - (p.life) / InitLife)))/256.0);
+
 
                     // Update Position
                     float last_y = p.pos.y;
@@ -209,18 +227,20 @@ int main() {
 					// Update Velocity					
                     float l = getLength(p.speed);
                     float temp = p.speed.y;
-                    if (p.pos.y < LowPress[0][0].y) {
-                        p.speed += getDirection(LowPress[0][target] - p.pos) * (float)delta * forceOfPress;
-                    }
-                    else if (p.pos.y < LowPress[1][0].y) {
-                        if (last_y < LowPress[0][0].y)
-                        {
-                            p.target = rand() % 3;
+                    if (UseLowPress) {
+                        if (p.pos.y < LowPress[0][0].y) {
+                            p.speed += getDirection(LowPress[0][p.target] - p.pos) * (float)delta * forceOfPress * BurstRate;
                         }
-                        p.speed += getDirection(LowPress[1][target] - p.pos) * (float)delta * forceOfPress;
+                        else if (p.pos.y < LowPress[1][0].y) {
+                            if (last_y < LowPress[0][0].y)
+                            {
+                                p.target = rand() % 3;
+                            }
+                            p.speed += getDirection(LowPress[1][p.target] - p.pos) * (float)delta * forceOfPress * BurstRate;
+                        }
+                        else
+                            p.speed += getDirection(LowPress[2][0] - p.pos) * (float)delta * forceOfPress * BurstRate;
                     }
-                    else
-                        p.speed += getDirection(LowPress[2][0] - p.pos) * (float)delta * forceOfPress;
 
                     p.speed.y = temp;  // y velocity remains the same
                     float ll = getLength(p.speed);                    

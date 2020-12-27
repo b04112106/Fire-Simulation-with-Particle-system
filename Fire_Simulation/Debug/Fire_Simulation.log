@@ -1,7 +1,42 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(491,5): warning MSB8028: 中繼目錄 (Debug\) 包含從其他專案 (HW0.vcxproj) 共用的檔案。這可能導致錯誤的清除和重建行為。
   Source.cpp
-C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(176,32): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(180,53): warning C4244: '=': 將 'float' 轉換為 'unsigned char'，由於類型不同，可能導致資料遺失
-C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(182,48): warning C4244: '=': 將 'float' 轉換為 'unsigned char'，由於類型不同，可能導致資料遺失
-C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(183,84): warning C4244: '*=': 將 'double' 轉換為 'unsigned char'，由於類型不同，可能導致資料遺失
+C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(171,78): warning C4244: '=': 將 'double' 轉換為 'T'，由於類型不同，可能導致資料遺失
+          with
+          [
+              T=float
+          ]
+C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(172,78): warning C4244: '=': 將 'double' 轉換為 'T'，由於類型不同，可能導致資料遺失
+          with
+          [
+              T=float
+          ]
+C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(173,78): warning C4244: '=': 將 'double' 轉換為 'T'，由於類型不同，可能導致資料遺失
+          with
+          [
+              T=float
+          ]
+C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(174,78): warning C4244: '=': 將 'double' 轉換為 'T'，由於類型不同，可能導致資料遺失
+          with
+          [
+              T=float
+          ]
+C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(175,78): warning C4244: '=': 將 'double' 轉換為 'T'，由於類型不同，可能導致資料遺失
+          with
+          [
+              T=float
+          ]
+C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(176,78): warning C4244: '=': 將 'double' 轉換為 'T'，由於類型不同，可能導致資料遺失
+          with
+          [
+              T=float
+          ]
+C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(177,71): warning C4244: '=': 將 'double' 轉換為 'T'，由於類型不同，可能導致資料遺失
+          with
+          [
+              T=float
+          ]
+C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(214,32): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(217,53): warning C4244: '=': 將 'float' 轉換為 'unsigned char'，由於類型不同，可能導致資料遺失
+C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(219,48): warning C4244: '=': 將 'float' 轉換為 'unsigned char'，由於類型不同，可能導致資料遺失
+C:\Users\CGGM\source\repos\Fire_Simulation\Fire_Simulation\Source.cpp(220,84): warning C4244: '*=': 將 'double' 轉換為 'unsigned char'，由於類型不同，可能導致資料遺失
   Fire_Simulation.vcxproj -> C:\Users\CGGM\source\repos\Fire_Simulation\Debug\Fire_Simulation.exe
