@@ -99,3 +99,72 @@ bool ManuallyAdjustLowPressPoint = false;
     float InitLife = 3.0f;
     float forceOfPress = 20.0f;
     float BurstRate = 1.0f;
+
+    // 12/27 16:34 Magical Fire
+    bool ManuallyAdjustLowPressPoint = false;
+    bool UseLowPress = true;
+    bool EnableWindEffect = false;
+    vec3 OriLowPress[3][3] = {
+        {vec3(0.5f, 3, -20.0f),vec3(0, 3, -20.0f),vec3(-0.5f, 3, -20.0f)},
+        {vec3(0.25f, 6, -20.0f), vec3(0, 6, -20.0f), vec3(-0.25f, 6, -20.0f)},
+        {vec3(0, 8, -20.0f),vec3(0, 8, -20.0f),vec3(0, 8, -20.0f)}
+    };
+    vec3 LowPress[3][3] = {
+        {vec3(0.5f, 3, -20.0f),vec3(0, 3, -20.0f),vec3(-0.5f, 3, -20.0f)},
+        {vec3(0.25f, 6, -20.0f), vec3(0, 6, -20.0f), vec3(-0.25f, 6, -20.0f)},
+        {vec3(0, 8, -20.0f),vec3(0, 8, -20.0f),vec3(0, 8, -20.0f)}
+    };
+    float heightOfLowPress[3] = { 2,4,8 };
+
+    float ParticlesPerSecond = 4500;
+    float InitialPositionRadius = 2.0f;
+    vec3 PoolOfInitialVelocity[] = {
+        vec3(0,3,0)
+    };
+    int lengthOfPool = sizeof(PoolOfInitialVelocity) / 12;
+    float randV_Xmax = 5.0, randV_Xmin = -5.0;
+    float randV_Ymax = 1.0, randV_Ymin = -1.0;
+    float randV_Zmax = 5.0, randV_Zmin = -5.0;
+    unsigned int InitialAlpha = 255;
+    Colour InitialColor(255, 191, 0, InitialAlpha);
+    float InitialSize = 0.5f;
+    float InitLife = 3.0f;
+    float forceOfPress = 20.0f;
+    float BurstRate = 1.0f;
+
+    // 12/27 16:46 Fucking Good Fire
+    bool ManuallyAdjustLowPressPoint = false;
+    bool UseLowPress = true;
+    bool EnableWindEffect = false;
+    vec3 OriLowPress[3][3] = {
+        {vec3(0.5f, 3, -20.0f),vec3(0, 3, -20.0f),vec3(-0.5f, 3, -20.0f)},
+        {vec3(0.25f, 6, -20.0f), vec3(0, 6, -20.0f), vec3(-0.25f, 6, -20.0f)},
+        {vec3(0, 8, -20.0f),vec3(0, 8, -20.0f),vec3(0, 8, -20.0f)}
+    };
+    vec3 LowPress[3][3] = {
+        {vec3(0.5f, 3, -20.0f),vec3(0, 3, -20.0f),vec3(-0.5f, 3, -20.0f)},
+        {vec3(0.25f, 6, -20.0f), vec3(0, 6, -20.0f), vec3(-0.25f, 6, -20.0f)},
+        {vec3(0, 8, -20.0f),vec3(0, 8, -20.0f),vec3(0, 8, -20.0f)}
+    };
+    float heightOfLowPress[3] = { 2,4,8 };
+
+    float ParticlesPerSecond = 4500;
+    float InitialPositionRadius = 2.0f;
+    vec3 PoolOfInitialVelocity[] = {
+        vec3(0,3,0)
+    };
+    int lengthOfPool = sizeof(PoolOfInitialVelocity) / 12;
+    float randV_Xmax = 3.0, randV_Xmin = -3.0;
+    float randV_Ymax = 2.0, randV_Ymin = -2.0;
+    float randV_Zmax = 3.0, randV_Zmin = -3.0;
+    unsigned int InitialAlpha = 64;
+    Colour InitialColor(255, 191, 0, InitialAlpha);
+    float InitialSize = 0.5f;
+    float InitLife = 3.0f;
+    float forceOfPress = 10.0f;
+    float BurstRate = 1.0f;
+
+    //Emitter one
+    emitter(0,vec3(0,0,-20.0f),2.0f,vec3(0,3,0),2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,1000,128,Colour(255,191,0,128),0.6f,3.0f,20.0f,1.0f),
+    emitter(0,vec3(0.5,0,-20.0f),2.0f,vec3(3.0f,5,0),  3.0f,-1.0f,2.0f,-2.0f,2.0f,-2.0f,1000,32,Colour(255,191,0,32),0.2f,3.0f,5.0f,1.0f),
+    emitter(0,vec3(-0.5,0,-20.0f),2.0f,vec3(-3.0f,5,0),1.0f,-3.0f,2.0f,-2.0f,2.0f,-2.0f,1000,32,Colour(255,191,0,32),0.2f,3.0f,5.0f,1.0f)

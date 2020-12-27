@@ -168,6 +168,9 @@
     <None Include="dll\shader\SimpleFragmentShader.fragmentshader" />
     <None Include="dll\shader\SimpleVertexShader.vertexshader" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\TopTenFires.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

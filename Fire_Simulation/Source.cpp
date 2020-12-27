@@ -1,38 +1,21 @@
 #include "Particle_System.h"
 int main() {
 	///////////////Control Variables/////////////////
-    bool ManuallyAdjustLowPressPoint = false;
-    bool UseLowPress = true;
-    bool EnableWindEffect = true;
-    vec3 OriLowPress[3][3] = {
-        {vec3(0.5f, 3, -20.0f),vec3(0, 3, -20.0f),vec3(-0.5f, 3, -20.0f)},
-        {vec3(0.25f, 6, -20.0f), vec3(0, 6, -20.0f), vec3(-0.25f, 6, -20.0f)},
-        {vec3(0, 8, -20.0f),vec3(0, 8, -20.0f),vec3(0, 8, -20.0f)}
+    // Start particle index , End particle index
+    // Position, radius
+    // Main Direction xyz random Direction
+    // Particle per second
+    // Initial color/Size/Life/Force/BurstRate
+    /*emitter(int _id, int start, int end, vec3 pos, float r, vec3 initvel, float Mx, float mx, float My, float my, float Mz, float mz,
+        int pps, unsigned char initAlpha, Colour initC, float size, float Life, float force, float BRate) :
+        id(_id), InitialPosition(pos), InitialPositionRadius(r), InitialVelocity(initvel), randV_Xmax(Mx), randV_Xmin(mx), randV_Ymax(My), randV_Ymin(my), randV_Zmax(Mz), randV_Zmin(mz),
+        ParticlesPerSecond(pps), InitialAlpha(initAlpha), InitialColor(initC), InitialSize(size), InitLife(Life), forceOfPress(force), BurstRate(BRate), LastUsedParticle(start) {}*/
+    const int NumOfEmiiters = 3;
+    emitter ListOfEmitter[] = {
+        emitter(0,vec3(0,0,-20.0f),2.0f,vec3(0,5,0),2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,2000,100,Colour(255,191,0,100),0.6f,3.0f,10.0f,1.0f),
+        emitter(0,vec3(0.75,0,-20.0f),2.0f,vec3(3.0f,3,0),  2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,500,32,Colour(255,191,0,32),0.2f,3.0f,5.0f,1.0f),
+        emitter(0,vec3(-0.75,0,-20.0f),2.0f,vec3(-3.0f,3,0),2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,500,32,Colour(255,191,0,32),0.2f,3.0f,5.0f,1.0f)
     };
-    vec3 LowPress[3][3] = {
-        {vec3(0.5f, 3, -20.0f),vec3(0, 3, -20.0f),vec3(-0.5f, 3, -20.0f)},
-        {vec3(0.25f, 6, -20.0f), vec3(0, 6, -20.0f), vec3(-0.25f, 6, -20.0f)},
-        {vec3(0, 8, -20.0f),vec3(0, 8, -20.0f),vec3(0, 8, -20.0f)}
-    };
-    float heightOfLowPress[3] = { 2,4,8 };
-
-    float ParticlesPerSecond = 4500;
-    float InitialPositionRadius = 1.0f;
-    vec3 PoolOfInitialVelocity[] = {
-        vec3(-1,5,0),
-        vec3(1,5,0),
-        vec3(0,5,0)
-    };
-    int lengthOfPool = sizeof(PoolOfInitialVelocity) / 12;
-    float randV_Xmax = 2.0, randV_Xmin = -2.0;
-    float randV_Ymax = 1.0, randV_Ymin = -1.0;
-    float randV_Zmax = 2.0, randV_Zmin = -2.0;
-    unsigned int InitialAlpha = 64;
-    Colour InitialColor(255, 191, 0, InitialAlpha);
-    float InitialSize = 0.5f;
-    float InitLife = 3.0f;
-    float forceOfPress = 20.0f;
-    float BurstRate = 1.0f;
 	/////////////////////////////////////////////////
     // Initialise GLFW
     if (!glfwInit())
@@ -98,8 +81,14 @@ int main() {
 
     // The VBO containing the 4 vertices of the particles.
     // Thanks to instancing, they will be shared by all particles.
-    static const GLfloat g_vertex_buffer_data[] = {
-        0.0f,0.0f,0.0f,
+    static const GLfloat g_vertex_buffer_data[] = 
+    {
+        -0.5f,-0.5f,0.0f,
+        0.5f,-0.5f,0.0f,
+        -0.5f,0.5f,0.0f,
+        0.5f,0.5f,0.0f
+    };
+    /*{ 0.0f,0.0f,0.0f,
         0.3535f,-0.3535f,0.0f,
         0.0f,-0.5f,0.0f,
         -0.3535f,-0.3535f,0.0f,
@@ -108,12 +97,7 @@ int main() {
         0.0f,0.5f,0.0f,
         0.3535f,0.3535f,0.0f,
         0.5f,0.0f,0.0f,
-        0.3535f,-0.3535f,0.0f/*
-        -0.5f,-0.5f,0.0f,
-        0.5f,-0.5f,0.0f,
-        -0.5f,0.5f,0.0f,
-        0.5f,0.5f,0.0f*/
-    };
+        0.3535f,-0.3535f,0.0f }*/
 
     GLuint billboard_vertex_buffer;
     glGenBuffers(1, &billboard_vertex_buffer);
@@ -138,16 +122,25 @@ int main() {
     glDepthFunc(GL_LESS);
 	
 	if(!ManuallyAdjustLowPressPoint){
-		LowPress[0][0].y = heightOfLowPress[0] * BurstRate;
-		LowPress[0][1].y = heightOfLowPress[0] * BurstRate;
-		LowPress[0][2].y = heightOfLowPress[0] * BurstRate;
-		LowPress[1][0].y = heightOfLowPress[1] * BurstRate;
-		LowPress[1][1].y = heightOfLowPress[1] * BurstRate;
-		LowPress[1][2].y = heightOfLowPress[1] * BurstRate;
-		LowPress[2][0].y = heightOfLowPress[2] * BurstRate;
+		LowPress[0][0].y = heightOfLowPress[0];
+        LowPress[0][0].x = level1_radius;
+        OriLowPress[0][0].x = level1_radius;
+		LowPress[0][1].y = heightOfLowPress[0];
+		LowPress[0][2].y = heightOfLowPress[0];
+        LowPress[0][2].x = -level1_radius;
+        OriLowPress[0][2].x = -level1_radius;
+		LowPress[1][0].y = heightOfLowPress[1];
+        LowPress[1][0].x = level2_radius;
+        OriLowPress[1][0].x = level2_radius;
+		LowPress[1][1].y = heightOfLowPress[1];
+		LowPress[1][2].y = heightOfLowPress[1];
+        LowPress[1][2].x = -level2_radius;
+        OriLowPress[1][2].x = -level2_radius;
+		LowPress[2][0].y = heightOfLowPress[2];
 	}
     do {
         // Clear the screen
+        //getchar();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         double currentTime = glfwGetTime();
@@ -158,11 +151,7 @@ int main() {
         glm::mat4 ProjectionMatrix = getProjectionMatrix();
         glm::mat4 ViewMatrix = getViewMatrix();
 
-        // We will need the camera's position in order to sort the particles w.r.t the camera's distance.
-        // There should be a getCameraPosition() function in common/controls.cpp, 
-        // but this works too.
         glm::vec3 CameraPosition(glm::inverse(ViewMatrix)[3]);
-       
 
         glm::mat4 ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
 
@@ -176,100 +165,55 @@ int main() {
             LowPress[1][2].x = OriLowPress[1][2].x + sin(currentTime * 5.0f) + 1;
             LowPress[2][0].x = OriLowPress[2][0].x + sin(currentTime) + 1;
         }
-        // Numbers of newparitcles in each frame, limited by 16 particles each frame
-        int newparticles = (int)(delta * ParticlesPerSecond * BurstRate);
-        if (newparticles > (int)(0.050f * ParticlesPerSecond * BurstRate))
-            newparticles = (int)(0.050f * ParticlesPerSecond * BurstRate);
-        
         // Add new particles and initialize
-        for (int i = 0; i < newparticles; i++) {
-            int particleIndex = FindUnusedParticle();
-            ParticlesContainer[particleIndex].life = InitLife - (float)((rand() % 100) / 300.0);
-
-            float randT = (float)(rand() % 360);
-            float r = (float)(rand() % 100 / 100.0) * InitialPositionRadius;
-            ParticlesContainer[particleIndex].pos = glm::vec3(r * cos(randT * PI / 180.0), r * sin(randT * PI / 180.0) / 1.2f, -20.0f);
-
-            glm::vec3 maindir = PoolOfInitialVelocity[rand() % lengthOfPool];
-            glm::vec3 randomDir = glm::vec3(
-                (rand() % (int)((randV_Xmax - randV_Xmin) * 1000.0f) + 1000.0f * randV_Xmin) / 1000.0f,
-                (rand() % (int)((randV_Ymax - randV_Ymin) * 1000.0f) + 1000.0f * randV_Ymin) / 1000.0f,
-                (rand() % (int)((randV_Zmax - randV_Zmin) * 1000.0f) + 1000.0f * randV_Zmin) / 1000.0f
-            );
-            ParticlesContainer[particleIndex].target = rand() % 3;
-
-            ParticlesContainer[particleIndex].speed = (maindir + randomDir) * BurstRate;
-
-            ParticlesContainer[particleIndex].color = InitialColor;
-            ParticlesContainer[particleIndex].size = InitialSize;
+        for (int i = 0; i < NumOfEmiiters; ++i)
+        {
+            ListOfEmitter[i].AddNewParticles(delta);
         }
+        
+        /*std::cout << "E1" << std::endl;
+        ListOfEmitter[0].showInformation();
+        std::cout << "E2" << std::endl;
+        ListOfEmitter[1].showInformation();*/
         // Simulate all particles
         int ParticlesCount = 0;
+        //std::cout << "Delta = " << delta << std::endl;
+        /*for (int i = 0; i < MaxParticles; i++) {
+            if (ParticlesContainer[i].life > 0.0f) {
+                if (i > 50000)
+                    count[1]++;
+                else
+                    count[0]++;
+            }
+        }*/
         for (int i = 0; i < MaxParticles; i++) {
 
             Particle& p = ParticlesContainer[i]; // shortcut
+            //int EmitterIndex = FindEmitterIndex(accNumOfParticle, i);
+            //std::cout << "FindEmitterIndex(" << i << ") = " << EmitterIndex << std::endl;
+            ListOfEmitter[p.id].Simulate(delta,p, CameraPosition);
+            if (p.life > 0.0f) {    
+                //std::cout << "Simulating Particle " << i << std::endl;
+                // Fill the GPU buffer
+                g_particule_position_size_data[4 * ParticlesCount + 0] = p.pos.x;
+                g_particule_position_size_data[4 * ParticlesCount + 1] = p.pos.y;
+                g_particule_position_size_data[4 * ParticlesCount + 2] = p.pos.z;
 
-            if (p.life > 0.0f) {
-                // Decrease life
-                p.life -= delta;
-                if (p.life > 0.0f) {
-                    // Update Colour
-                    p.color.a = (p.life) / InitLife * InitialAlpha;
-                    p.size = (p.life) / InitLife * InitialSize;
-                    p.color.g = 191 * (p.life) / InitLife;
-                    p.color.g *= ((256 - pow(2,8*(1 - (p.life) / InitLife)))/256.0);
+                g_particule_position_size_data[4 * ParticlesCount + 3] = p.size;
 
-
-                    // Update Position
-                    float last_y = p.pos.y;
-                    p.pos += p.speed * (float)delta; 
-
-					// Update Velocity					
-                    float l = getLength(p.speed);
-                    float temp = p.speed.y;
-                    if (UseLowPress) {
-                        if (p.pos.y < LowPress[0][0].y) {
-                            p.speed += getDirection(LowPress[0][p.target] - p.pos) * (float)delta * forceOfPress * BurstRate;
-                        }
-                        else if (p.pos.y < LowPress[1][0].y) {
-                            if (last_y < LowPress[0][0].y)
-                            {
-                                p.target = rand() % 3;
-                            }
-                            p.speed += getDirection(LowPress[1][p.target] - p.pos) * (float)delta * forceOfPress * BurstRate;
-                        }
-                        else
-                            p.speed += getDirection(LowPress[2][0] - p.pos) * (float)delta * forceOfPress * BurstRate;
-                    }
-
-                    p.speed.y = temp;  // y velocity remains the same
-                    float ll = getLength(p.speed);                    
-                    p.speed.x *= (l / ll);
-                    p.speed.z *= (l / ll);
-                    
-                    p.cameradistance = glm::length2(p.pos - CameraPosition);
-
-                    // Fill the GPU buffer
-                    g_particule_position_size_data[4 * ParticlesCount + 0] = p.pos.x;
-                    g_particule_position_size_data[4 * ParticlesCount + 1] = p.pos.y;
-                    g_particule_position_size_data[4 * ParticlesCount + 2] = p.pos.z;
-
-                    g_particule_position_size_data[4 * ParticlesCount + 3] = p.size;
-
-                    g_particule_color_data[4 * ParticlesCount + 0] = p.color.r;
-                    g_particule_color_data[4 * ParticlesCount + 1] = p.color.g;
-                    g_particule_color_data[4 * ParticlesCount + 2] = p.color.b;
-                    g_particule_color_data[4 * ParticlesCount + 3] = p.color.a;
-                }
-                else {
-                    // Particles that just died will be put at the end of the buffer in SortParticles();
-                    p.cameradistance = -1.0f;
-                    p.color.a = 0;
-                }
+                g_particule_color_data[4 * ParticlesCount + 0] = p.color.r;
+                g_particule_color_data[4 * ParticlesCount + 1] = p.color.g;
+                g_particule_color_data[4 * ParticlesCount + 2] = p.color.b;
+                g_particule_color_data[4 * ParticlesCount + 3] = p.color.a;
+                
                 ParticlesCount++;
             }
+            else
+            {
+                //std::cout << "Particle " << i << " is dead" << std::endl;
+            }
         }
-
+       
         SortParticles();
 
         glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
@@ -346,7 +290,10 @@ int main() {
         // This is equivalent to :
         // for(i in ParticlesCount) : glDrawArrays(GL_TRIANGLE_STRIP, 0, 4), 
         // but faster.
-        glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 10, ParticlesCount);
+        if(UseBigPattern)
+            glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 10, ParticlesCount);
+        else
+            glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, ParticlesCount);
 
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
