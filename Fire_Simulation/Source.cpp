@@ -10,12 +10,14 @@ int main() {
         int pps, unsigned char initAlpha, Colour initC, float size, float Life, float force, float BRate) :
         id(_id), InitialPosition(pos), InitialPositionRadius(r), InitialVelocity(initvel), randV_Xmax(Mx), randV_Xmin(mx), randV_Ymax(My), randV_Ymin(my), randV_Zmax(Mz), randV_Zmin(mz),
         ParticlesPerSecond(pps), InitialAlpha(initAlpha), InitialColor(initC), InitialSize(size), InitLife(Life), forceOfPress(force), BurstRate(BRate), LastUsedParticle(start) {}*/
-    const int NumOfEmiiters = 3;
+    
     emitter ListOfEmitter[] = {
-        emitter(0,vec3(0,0,-20.0f),2.0f,vec3(0,5,0),2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,2000,100,Colour(255,191,0,100),0.6f,3.0f,10.0f,1.0f),
-        emitter(0,vec3(0.75,0,-20.0f),2.0f,vec3(3.0f,3,0),  2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,500,32,Colour(255,191,0,32),0.2f,3.0f,5.0f,1.0f),
-        emitter(0,vec3(-0.75,0,-20.0f),2.0f,vec3(-3.0f,3,0),2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,500,32,Colour(255,191,0,32),0.2f,3.0f,5.0f,1.0f)
+        emitter(0,vec3(0,0,-20.0f),1.0f,vec3(0,2,0),2.0f,-2.0f,2.0f,-2.0f,0.0f,0.01f,3000,64,Colour(255,191,0,64),0.3f,3.0f,10.0f,1.0f),
+        emitter(1,vec3(0.75f,0,-20.0f),1.0f,vec3(0.5f,2,0),  2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,1000,32,Colour(255,64,0,32),0.2f,3.0f,5.0f,1.0f),
+        emitter(2,vec3(-0.75f,0,-20.0f),1.0f,vec3(-0.5f,2,0),2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,1000,32,Colour(255,64,0,32),0.2f,3.0f,5.0f,1.0f)
     };
+
+    const int NumOfEmiiters = sizeof(ListOfEmitter) / sizeof(emitter);
 	/////////////////////////////////////////////////
     // Initialise GLFW
     if (!glfwInit())
@@ -81,23 +83,23 @@ int main() {
 
     // The VBO containing the 4 vertices of the particles.
     // Thanks to instancing, they will be shared by all particles.
-    static const GLfloat g_vertex_buffer_data[] = 
-    {
-        -0.5f,-0.5f,0.0f,
-        0.5f,-0.5f,0.0f,
-        -0.5f,0.5f,0.0f,
-        0.5f,0.5f,0.0f
-    };
-    /*{ 0.0f,0.0f,0.0f,
-        0.3535f,-0.3535f,0.0f,
-        0.0f,-0.5f,0.0f,
-        -0.3535f,-0.3535f,0.0f,
-        -0.5f,0.0f,0.0f,
-        -0.3535f,0.3535f,0.0f,
-        0.0f,0.5f,0.0f,
-        0.3535f,0.3535f,0.0f,
-        0.5f,0.0f,0.0f,
-        0.3535f,-0.3535f,0.0f }*/
+    static const GLfloat g_vertex_buffer_data[] =
+        /*{
+            -0.5f,-0.5f,0.0f,
+            0.5f,-0.5f,0.0f,
+            -0.5f,0.5f,0.0f,
+            0.5f,0.5f,0.0f
+        };*/
+    { 0.0f,0.0f,0.0f,
+        0.3f,-0.3f,0.0f,
+        0.0f,-0.45f,0.0f,
+        -0.3f,-0.3f,0.0f,
+        -0.45f,0.0f,0.0f,
+        -0.3f,0.3f,0.0f,
+        0.0f,0.45f,0.0f,
+        0.3f,0.3f,0.0f,
+        0.45f,0.0f,0.0f,
+        0.3f,-0.3f,0.0f };
 
     GLuint billboard_vertex_buffer;
     glGenBuffers(1, &billboard_vertex_buffer);
@@ -120,7 +122,8 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     // Accept fragment if it closer to the camera than the former one
     glDepthFunc(GL_LESS);
-	
+    // For FPS display
+    float acc = 0;
 	if(!ManuallyAdjustLowPressPoint){
 		LowPress[0][0].y = heightOfLowPress[0];
         LowPress[0][0].x = level1_radius;
@@ -146,7 +149,11 @@ int main() {
         double currentTime = glfwGetTime();
         double delta = currentTime - lastTime;
         lastTime = currentTime;
-
+        acc += delta;
+        if (acc > 1) {
+            std::cout << "FPS:" << 1 / delta << std::endl;
+            acc = 0;
+        }
         computeMatricesFromInputs(window);
         glm::mat4 ProjectionMatrix = getProjectionMatrix();
         glm::mat4 ViewMatrix = getViewMatrix();
@@ -170,30 +177,21 @@ int main() {
         {
             ListOfEmitter[i].AddNewParticles(delta);
         }
-        
-        /*std::cout << "E1" << std::endl;
-        ListOfEmitter[0].showInformation();
-        std::cout << "E2" << std::endl;
-        ListOfEmitter[1].showInformation();*/
+
         // Simulate all particles
         int ParticlesCount = 0;
-        //std::cout << "Delta = " << delta << std::endl;
-        /*for (int i = 0; i < MaxParticles; i++) {
-            if (ParticlesContainer[i].life > 0.0f) {
-                if (i > 50000)
-                    count[1]++;
-                else
-                    count[0]++;
-            }
-        }*/
+
         for (int i = 0; i < MaxParticles; i++) {
 
-            Particle& p = ParticlesContainer[i]; // shortcut
-            //int EmitterIndex = FindEmitterIndex(accNumOfParticle, i);
-            //std::cout << "FindEmitterIndex(" << i << ") = " << EmitterIndex << std::endl;
-            ListOfEmitter[p.id].Simulate(delta,p, CameraPosition);
-            if (p.life > 0.0f) {    
-                //std::cout << "Simulating Particle " << i << std::endl;
+            Particle& p = ParticlesContainer[i];
+            ListOfEmitter[p.id].Simulate(delta, p, CameraPosition);
+        }
+
+        SortParticles();
+
+        for (int i = 0; i < MaxParticles; i++) {
+            Particle& p = ParticlesContainer[i];
+            if (p.life > 0.0f) {
                 // Fill the GPU buffer
                 g_particule_position_size_data[4 * ParticlesCount + 0] = p.pos.x;
                 g_particule_position_size_data[4 * ParticlesCount + 1] = p.pos.y;
@@ -208,13 +206,7 @@ int main() {
                 
                 ParticlesCount++;
             }
-            else
-            {
-                //std::cout << "Particle " << i << " is dead" << std::endl;
-            }
-        }
-       
-        SortParticles();
+        }       
 
         glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
         glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // Buffer orphaning
@@ -265,7 +257,6 @@ int main() {
             0,                                // stride
             (void*)0                          // array buffer offset
         );
-
         // 3rd attribute buffer : particles' colors
         glEnableVertexAttribArray(2);
         glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
@@ -315,9 +306,7 @@ int main() {
     glDeleteTextures(1, &Texture);
     glDeleteVertexArrays(1, &VertexArrayID);
 
-
     // Close OpenGL window and terminate GLFW
     glfwTerminate();
-
     return 0;
 }

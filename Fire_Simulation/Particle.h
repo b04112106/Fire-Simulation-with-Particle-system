@@ -21,6 +21,4 @@ public:
 		// Sort in reverse order : far particles drawn first.
 		return this->cameradistance > that.cameradistance;
 	}
-	virtual void setColor(Colour a, Colour b, float alpha);
-	//virtual GLubyte* getColorBytes();
 };

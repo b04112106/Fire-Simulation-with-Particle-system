@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <omp.h>
 GLFWwindow* window;
 
 #include <glm/glm.hpp>
@@ -20,16 +21,13 @@ using namespace glm;
 #include <math.h> 
 
 #define PI 3.1415926
-/// <summary>
-/// Class Particle system hasn't created yet
-/// </summary>
-/// 
+
 const int MaxParticles = 100000;
 Particle ParticlesContainer[MaxParticles];
 bool ManuallyAdjustLowPressPoint = false;
 bool UseLowPress = true;
 bool EnableWindEffect = false;
-bool UseBigPattern = false;
+bool UseBigPattern = true;
 vec3 OriLowPress[3][3] = {
 	{vec3(2.0f, 3, -20.0f),vec3(0, 3, -20.0f),vec3(-2.0f, 3, -20.0f)},
 	{vec3(2.0f, 6, -20.0f), vec3(0, 6, -20.0f), vec3(-2.0f, 6, -20.0f)},
@@ -40,9 +38,9 @@ vec3 LowPress[3][3] = {
 	{vec3(2.0f, 6, -20.0f), vec3(0, 6, -20.0f), vec3(-2.0f, 6, -20.0f)},
 	{vec3(0, 8, -20.0f),vec3(0, 8, -20.0f),vec3(0, 8, -20.0f)}
 };
-float heightOfLowPress[3] = { 5,9,12 };
-float level1_radius = 1.25f;
-float level2_radius = 1.0f;
+float heightOfLowPress[3] = { 1.5f,3,4 };
+float level1_radius = 0.25f;
+float level2_radius = 0.125f;
 int LastUsedParticle = 0;
 int FindUnusedParticle() {
 
@@ -63,17 +61,13 @@ int FindUnusedParticle() {
 void SortParticles() {
 	std::sort(&ParticlesContainer[0], &ParticlesContainer[MaxParticles]);
 }
-
-float getLength(vec3 l)
-{
+float getLength(vec3 l){
 	return sqrt(l.x * l.x + l.y * l.y + l.z * l.z);
 }
-vec3 getDirection(vec3 l)
-{
+vec3 getDirection(vec3 l){
 	float len = getLength(l);
 	return vec3(l.x/len,l.y/len,l.z/len);
 }
-
 class emitter {
 private:
 	int id;
@@ -90,8 +84,6 @@ private:
 	float InitLife;
 	float forceOfPress;
 	float BurstRate;
-
-	int LastUsedParticle;
 public:
 	emitter(int _id, vec3 pos, float r, vec3 initvel, float Mx, float mx, float My, float my, float Mz, float mz, 
 			int pps,unsigned char initAlpha, Colour initC, float size, float Life, float force, float BRate) :
@@ -111,13 +103,8 @@ public:
 			// might be bug
 			int particleIndex = LastUsedParticle = FindUnusedParticle();
 			if (particleIndex < 0)return;
-			///std::cout << "LastUsedParticle:" << LastUsedParticle << " particleIndex:" << particleIndex << " in E" << id << std::endl;
 			ParticlesContainer[particleIndex].id = id;
 			ParticlesContainer[particleIndex].life = InitLife - (float)((rand() % 100) / 300.0);
-			/*if (id == 2) {
-				std::cout << "Particle " << particleIndex << " is init" << std::endl;
-				std::cout << "Life set:" << ParticlesContainer[particleIndex].life << std::endl;
-			}*/
 
 			float now_life = ParticlesContainer[particleIndex].life;
 			float randT = (float)(rand() % 360);
@@ -125,9 +112,9 @@ public:
 			ParticlesContainer[particleIndex].pos = glm::vec3(r * cos(randT * PI / 180.0) + InitialPosition.x, r * sin(randT * PI / 180.0) / 1.2f + InitialPosition.y, InitialPosition.z);
 			glm::vec3 maindir = InitialVelocity;
 			glm::vec3 randomDir = glm::vec3(
-				(rand() % (int)((randV_Xmax - randV_Xmin) * 1000.0f) + 1000.0f * randV_Xmin) / 1000.0f,
-				(rand() % (int)((randV_Ymax - randV_Ymin) * 1000.0f) + 1000.0f * randV_Ymin) / 1000.0f,
-				(rand() % (int)((randV_Zmax - randV_Zmin) * 1000.0f) + 1000.0f * randV_Zmin) / 1000.0f
+				(rand() % (int)((randV_Xmax - randV_Xmin) * 100.0f) + 100.0f * randV_Xmin) / 100.0f,
+				(rand() % (int)((randV_Ymax - randV_Ymin) * 100.0f) + 100.0f * randV_Ymin) / 100.0f,
+				(rand() % (int)((randV_Zmax - randV_Zmin) * 100.0f) + 100.0f * randV_Zmin) / 100.0f
 			);
 			ParticlesContainer[particleIndex].target = rand() % 3;
 
@@ -142,22 +129,19 @@ public:
 		if (p.life > 0.0f) {
 			// Decrease life
 			p.life -= delta;
-			//std::cout << "delta " << delta << std::endl;
 			if (p.life > 0.0f) {
 				// Update Colour
 				p.color.a = (p.life) / this->InitLife * this->InitialAlpha;
 				p.size = (p.life) / this->InitLife * this->InitialSize;
 				p.color.g = this->InitialColor.g * (p.life) / this->InitLife;
 				p.color.g *= ((256 - pow(2, 8 * (1 - (p.life) / InitLife))) / 256.0);
-				//f(id == 2 )
-				//std::cout << "In E" << id << " the size is set " << p.size << " = " << p.life << " / " << this->InitLife << " * " << this->InitialSize << std::endl;
 
-
-				//// Update Position
+				// Update Position
 				float last_y = p.pos.y;
 				p.pos += p.speed * (float)delta;
+				p.pos += vec3((rand() % 100 - 50) / 1000.0f, (rand() % 100 - 50) / 1000.0f, (rand() % 100 - 50) / 1000.0f);
 
-				//// Update Velocity					
+				// Update Velocity					
 				float l = getLength(p.speed);
 				float temp = p.speed.y;
 				if (UseLowPress) {
@@ -175,7 +159,7 @@ public:
 						p.speed += getDirection(LowPress[2][0] - p.pos) * (float)delta * forceOfPress * BurstRate;
 				}
 
-				p.speed.y = temp;  // y velocity remains the same
+				p.speed.y = temp  + (1 - (p.life) / this->InitLife * (p.life) / this->InitLife) * delta;  // y velocity remains the same
 				float ll = getLength(p.speed);
 				p.speed.x *= (l / ll);
 				p.speed.z *= (l / ll);
@@ -183,11 +167,8 @@ public:
 				p.cameradistance = glm::length2(p.pos - CameraPosition);
 			}else {
 				// Particles that just died will be put at the end of the buffer in SortParticles();
-				//std::cout << "Particle die in Emitter" << id << std::endl;
 				p.cameradistance = -1.0f;
-				//p.color.a = 0;
-			}
-			
+			}			
 		}
 	}
 };

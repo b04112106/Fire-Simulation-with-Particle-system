@@ -92,6 +92,8 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)include</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
