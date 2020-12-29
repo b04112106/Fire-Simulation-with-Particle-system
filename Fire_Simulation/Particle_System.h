@@ -56,9 +56,17 @@ int FindUnusedParticle() {
 			return i;
 		}
 	}
-	return -1;
+	return 0;
 }
+int s;
 void SortParticles() {
+	/*s = LastUsedParticle - 10000 > 0 ? LastUsedParticle - 10000 : 0;
+	if(LastUsedParticle > 10000)
+		std::sort(&ParticlesContainer[s], &ParticlesContainer[LastUsedParticle]);
+	else
+	{
+		std::sort(&ParticlesContainer[LastUsedParticle], &ParticlesContainer[MaxParticles - 10000 + LastUsedParticle]);
+	}*/
 	std::sort(&ParticlesContainer[0], &ParticlesContainer[MaxParticles]);
 }
 float getLength(vec3 l){
@@ -96,15 +104,13 @@ public:
 		std::cout << "Alpha:" << (int)InitialAlpha<< std::endl;
 	}
 	void AddNewParticles(double delta) {
-		int newparticles = (int)(delta * ParticlesPerSecond * BurstRate);
-		if (newparticles > (int)(0.050f * ParticlesPerSecond * BurstRate))
-			newparticles = (int)(0.050f * ParticlesPerSecond * BurstRate);
+		int newparticles = (int)(0.050f * ParticlesPerSecond * BurstRate);
+		/*if (newparticles > (int)(0.050f * ParticlesPerSecond * BurstRate))
+			newparticles = (int)(0.050f * ParticlesPerSecond * BurstRate);*/
 		for (int i = 0; i < newparticles; i++) {
-			// might be bug
 			int particleIndex = LastUsedParticle = FindUnusedParticle();
-			if (particleIndex < 0)return;
 			ParticlesContainer[particleIndex].id = id;
-			ParticlesContainer[particleIndex].life = InitLife - (float)((rand() % 100) / 300.0);
+			ParticlesContainer[particleIndex].life = InitLife - (float)((rand() & 127 ) / 300.0f);
 
 			float now_life = ParticlesContainer[particleIndex].life;
 			float randT = (float)(rand() % 360);
@@ -126,49 +132,48 @@ public:
 		}
 	}
 	void Simulate(double delta, Particle &p,vec3 CameraPosition) {
-		if (p.life > 0.0f) {
+		if (p.life > delta) {
 			// Decrease life
 			p.life -= delta;
-			if (p.life > 0.0f) {
-				// Update Colour
-				p.color.a = (p.life) / this->InitLife * this->InitialAlpha;
-				p.size = (p.life) / this->InitLife * this->InitialSize;
-				p.color.g = this->InitialColor.g * (p.life) / this->InitLife;
-				p.color.g *= ((256 - pow(2, 8 * (1 - (p.life) / InitLife))) / 256.0);
+			// Update Colour
+			p.color.a = (p.life) / this->InitLife * this->InitialAlpha;
+			p.size = (p.life) / this->InitLife * this->InitialSize;
+			p.color.g = this->InitialColor.g * (p.life) / this->InitLife;
+			p.color.g *= ((256 - pow(2, 8 * (1 - (p.life) / InitLife))) / 256.0);
 
-				// Update Position
-				float last_y = p.pos.y;
-				p.pos += p.speed * (float)delta;
-				p.pos += vec3((rand() % 100 - 50) / 1000.0f, (rand() % 100 - 50) / 1000.0f, (rand() % 100 - 50) / 1000.0f);
+			// Update Position
+			float last_y = p.pos.y;
+			p.pos += p.speed * (float)delta;
+			p.pos += vec3((rand() % 100 - 50) / 1000.0f, (rand() % 100 - 50) / 1000.0f, (rand() % 100 - 50) / 1000.0f);
 
-				// Update Velocity					
-				float l = getLength(p.speed);
-				float temp = p.speed.y;
-				if (UseLowPress) {
-					if (p.pos.y < LowPress[0][0].y) {
-						p.speed += getDirection(LowPress[0][p.target] - p.pos) * (float)delta * forceOfPress * BurstRate;
-					}
-					else if (p.pos.y < LowPress[1][0].y) {
-						if (last_y < LowPress[0][0].y)
-						{
-							p.target = rand() % 3;
-						}
-						p.speed += getDirection(LowPress[1][p.target] - p.pos) * (float)delta * forceOfPress * BurstRate;
-					}
-					else
-						p.speed += getDirection(LowPress[2][0] - p.pos) * (float)delta * forceOfPress * BurstRate;
+			// Update Velocity					
+			float l = getLength(p.speed);
+			float temp = p.speed.y;
+			if (UseLowPress) {
+				if (p.pos.y < LowPress[0][0].y) {
+					p.speed += getDirection(LowPress[0][p.target] - p.pos) * (float)delta * forceOfPress * BurstRate;
 				}
+				else if (p.pos.y < LowPress[1][0].y) {
+					if (last_y < LowPress[0][0].y)
+					{
+						p.target = rand() % 3;
+					}
+					p.speed += getDirection(LowPress[1][p.target] - p.pos) * (float)delta * forceOfPress * BurstRate;
+				}
+				else
+					p.speed += getDirection(LowPress[2][0] - p.pos) * (float)delta * forceOfPress * BurstRate;
+			}
 
-				p.speed.y = temp  + (1 - (p.life) / this->InitLife * (p.life) / this->InitLife) * delta;  // y velocity remains the same
-				float ll = getLength(p.speed);
-				p.speed.x *= (l / ll);
-				p.speed.z *= (l / ll);
+			p.speed.y = temp  + (1 - (p.life) / this->InitLife * (p.life) / this->InitLife) * delta;  // y velocity remains the same
+			float ll = getLength(p.speed);
+			p.speed.x *= (l / ll);
+			p.speed.z *= (l / ll);
 
-				p.cameradistance = glm::length2(p.pos - CameraPosition);
-			}else {
-				// Particles that just died will be put at the end of the buffer in SortParticles();
-				p.cameradistance = -1.0f;
-			}			
-		}
+			p.cameradistance = glm::length2(p.pos - CameraPosition);
+		}else {
+			// Particles that just died will be put at the end of the buffer in SortParticles();
+			p.cameradistance = -1.0f;
+			p.life = -1.0f;
+		}					
 	}
 };

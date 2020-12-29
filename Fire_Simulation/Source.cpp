@@ -12,9 +12,9 @@ int main() {
         ParticlesPerSecond(pps), InitialAlpha(initAlpha), InitialColor(initC), InitialSize(size), InitLife(Life), forceOfPress(force), BurstRate(BRate), LastUsedParticle(start) {}*/
     
     emitter ListOfEmitter[] = {
-        emitter(0,vec3(0,0,-20.0f),1.0f,vec3(0,2,0),2.0f,-2.0f,2.0f,-2.0f,0.0f,0.01f,3000,64,Colour(255,191,0,64),0.3f,3.0f,10.0f,1.0f),
-        emitter(1,vec3(0.75f,0,-20.0f),1.0f,vec3(0.5f,2,0),  2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,1000,32,Colour(255,64,0,32),0.2f,3.0f,5.0f,1.0f),
-        emitter(2,vec3(-0.75f,0,-20.0f),1.0f,vec3(-0.5f,2,0),2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,1000,32,Colour(255,64,0,32),0.2f,3.0f,5.0f,1.0f)
+        emitter(0,vec3(0,0,-20.0f),2.0f,vec3(0,2,0),2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,9800,64,Colour(255,191,0,64),0.3f,3.0f,10.0f,1.0f),
+        emitter(1,vec3(0.75f,0,-20.0f),1.0f,vec3(0.5f,2,0),  2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,100,32,Colour(255,64,0,32),0.2f,3.0f,5.0f,1.0f),
+        emitter(2,vec3(-0.75f,0,-20.0f),1.0f,vec3(-0.5f,2,0),2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,100,32,Colour(255,64,0,32),0.2f,3.0f,5.0f,1.0f)
     };
 
     const int NumOfEmiiters = sizeof(ListOfEmitter) / sizeof(emitter);
@@ -150,10 +150,7 @@ int main() {
         double delta = currentTime - lastTime;
         lastTime = currentTime;
         acc += delta;
-        if (acc > 1) {
-            std::cout << "FPS:" << 1 / delta << std::endl;
-            acc = 0;
-        }
+        
         computeMatricesFromInputs(window);
         glm::mat4 ProjectionMatrix = getProjectionMatrix();
         glm::mat4 ViewMatrix = getViewMatrix();
@@ -186,7 +183,7 @@ int main() {
             Particle& p = ParticlesContainer[i];
             ListOfEmitter[p.id].Simulate(delta, p, CameraPosition);
         }
-
+        //if((acc > 0.49f && acc < 0.51f) || acc > 1)
         SortParticles();
 
         for (int i = 0; i < MaxParticles; i++) {
@@ -293,7 +290,12 @@ int main() {
         // Swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
+        if (acc > 1) {
+            std::cout << "FPS:" << 1 / delta << std::endl;
+            acc = 0;
+        }
     } // Check if the ESC key was pressed or the window was closed
+
     while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
 
     delete[] g_particule_position_size_data;
