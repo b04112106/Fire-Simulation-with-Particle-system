@@ -60,12 +60,12 @@ int FindUnusedParticle() {
 }
 int s;
 void SortParticles() {
-	/*s = LastUsedParticle - 10000 > 0 ? LastUsedParticle - 10000 : 0;
-	if(LastUsedParticle > 10000)
+	/*s = LastUsedParticle - 20000 > 0 ? LastUsedParticle - 20000 : 0;
+	if(LastUsedParticle > 20000)
 		std::sort(&ParticlesContainer[s], &ParticlesContainer[LastUsedParticle]);
 	else
 	{
-		std::sort(&ParticlesContainer[LastUsedParticle], &ParticlesContainer[MaxParticles - 10000 + LastUsedParticle]);
+		std::sort(&ParticlesContainer[LastUsedParticle], &ParticlesContainer[MaxParticles - 20000 + LastUsedParticle]);
 	}*/
 	std::sort(&ParticlesContainer[0], &ParticlesContainer[MaxParticles]);
 }
@@ -87,11 +87,15 @@ private:
 	float randV_Zmax, randV_Zmin;
 	int ParticlesPerSecond;
 	unsigned char InitialAlpha;
-	Colour InitialColor;
 	float InitialSize;
+public:
+	Colour InitialColor;
 	float InitLife;
+private:
 	float forceOfPress;
 	float BurstRate;
+	// For calculation
+	float l, ll;
 public:
 	emitter(int _id, vec3 pos, float r, vec3 initvel, float Mx, float mx, float My, float my, float Mz, float mz, 
 			int pps,unsigned char initAlpha, Colour initC, float size, float Life, float force, float BRate) :
@@ -104,9 +108,9 @@ public:
 		std::cout << "Alpha:" << (int)InitialAlpha<< std::endl;
 	}
 	void AddNewParticles(double delta) {
-		int newparticles = (int)(0.050f * ParticlesPerSecond * BurstRate);
-		/*if (newparticles > (int)(0.050f * ParticlesPerSecond * BurstRate))
-			newparticles = (int)(0.050f * ParticlesPerSecond * BurstRate);*/
+		int newparticles = (int)(delta * ParticlesPerSecond * BurstRate);
+		if (newparticles > (int)(0.050f * ParticlesPerSecond * BurstRate))
+			newparticles = (int)(0.050f * ParticlesPerSecond * BurstRate);
 		for (int i = 0; i < newparticles; i++) {
 			int particleIndex = LastUsedParticle = FindUnusedParticle();
 			ParticlesContainer[particleIndex].id = id;
@@ -136,8 +140,9 @@ public:
 			// Decrease life
 			p.life -= delta;
 			// Update Colour
-			p.color.a = (p.life) / this->InitLife * this->InitialAlpha;
 			p.size = (p.life) / this->InitLife * this->InitialSize;
+			p.color.a = (p.life) / this->InitLife * this->InitialAlpha;
+			
 			p.color.g = this->InitialColor.g * (p.life) / this->InitLife;
 			p.color.g *= ((256 - pow(2, 8 * (1 - (p.life) / InitLife))) / 256.0);
 
@@ -147,7 +152,7 @@ public:
 			p.pos += vec3((rand() % 100 - 50) / 1000.0f, (rand() % 100 - 50) / 1000.0f, (rand() % 100 - 50) / 1000.0f);
 
 			// Update Velocity					
-			float l = getLength(p.speed);
+			l = getLength(p.speed);
 			float temp = p.speed.y;
 			if (UseLowPress) {
 				if (p.pos.y < LowPress[0][0].y) {
@@ -165,7 +170,7 @@ public:
 			}
 
 			p.speed.y = temp  + (1 - (p.life) / this->InitLife * (p.life) / this->InitLife) * delta;  // y velocity remains the same
-			float ll = getLength(p.speed);
+			ll = getLength(p.speed);
 			p.speed.x *= (l / ll);
 			p.speed.z *= (l / ll);
 

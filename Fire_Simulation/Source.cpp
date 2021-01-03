@@ -12,9 +12,9 @@ int main() {
         ParticlesPerSecond(pps), InitialAlpha(initAlpha), InitialColor(initC), InitialSize(size), InitLife(Life), forceOfPress(force), BurstRate(BRate), LastUsedParticle(start) {}*/
     
     emitter ListOfEmitter[] = {
-        emitter(0,vec3(0,0,-20.0f),2.0f,vec3(0,2,0),2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,9800,64,Colour(255,191,0,64),0.3f,3.0f,10.0f,1.0f),
-        emitter(1,vec3(0.75f,0,-20.0f),1.0f,vec3(0.5f,2,0),  2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,100,32,Colour(255,64,0,32),0.2f,3.0f,5.0f,1.0f),
-        emitter(2,vec3(-0.75f,0,-20.0f),1.0f,vec3(-0.5f,2,0),2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,100,32,Colour(255,64,0,32),0.2f,3.0f,5.0f,1.0f)
+        emitter(0,vec3(0,0,-20.0f),1.5f,vec3(0,2,0),2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,6000,64,Colour(255,210,0,64),0.3f,3.0f,10.0f,1.0f),
+        emitter(1,vec3(0.75f,0,-20.0f),1.0f,vec3(0.5f,2,0),  2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,100,32,Colour(255,210,0,32),0.1f,3.0f,5.0f,1.0f),
+        emitter(2,vec3(-0.75f,0,-20.0f),1.0f,vec3(-0.5f,2,0),2.0f,-2.0f,2.0f,-2.0f,2.0f,-2.0f,100,32,Colour(255,210,0,32),0.1f,3.0f,5.0f,1.0f)
     };
 
     const int NumOfEmiiters = sizeof(ListOfEmitter) / sizeof(emitter);
@@ -114,7 +114,7 @@ int main() {
     GLuint particles_color_buffer;
     glGenBuffers(1, &particles_color_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
-    glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW);    
 
     double lastTime = glfwGetTime();
 
@@ -183,7 +183,6 @@ int main() {
             Particle& p = ParticlesContainer[i];
             ListOfEmitter[p.id].Simulate(delta, p, CameraPosition);
         }
-        //if((acc > 0.49f && acc < 0.51f) || acc > 1)
         SortParticles();
 
         for (int i = 0; i < MaxParticles; i++) {
@@ -265,13 +264,14 @@ int main() {
             0,                                // stride
             (void*)0                          // array buffer offset
         );
+       
 
         // These functions are specific to glDrawArrays*Instanced*.
         // The first parameter is the attribute buffer we're talking about.
         // The second parameter is the "rate at which generic vertex attributes advance when rendering multiple instances"
         glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
         glVertexAttribDivisor(1, 1); // positions : one per quad (its center)                 -> 1
-        glVertexAttribDivisor(2, 1); // color : one per quad                                  -> 1
+        glVertexAttribDivisor(2, 1); // color : one per quad  
 
         // Draw the particules !
         // This draws many times a small triangle_strip (which looks like a quad).
